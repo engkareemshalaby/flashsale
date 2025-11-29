@@ -15,12 +15,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Create a known test user only if not present (safe/idempotent)
+        if (! User::where('email', 'test@example.com')->exists()) {
+            User::factory()->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+            ]);
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-  
+        // Call ProductSeeder idempotently to ensure products exist for tests
+        if (class_exists(\Database\Seeders\ProductSeeder::class)) {
+            $this->call(\Database\Seeders\ProductSeeder::class);
+        }
     }
 }
