@@ -1,0 +1,123 @@
+{
+  "info": {
+    "name": "Flashsale API",
+    "_postman_id": "flashsale-collection-001",
+    "description": "Collection for Flashsale minimal inventory + holds API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Product",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/products/1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "1"
+          ]
+        },
+        "description": "Returns product fields including `available` stock. Change the `1` in the URL to another product id seeded by the seeder."
+      }
+    },
+    {
+      "name": "Create Hold",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"product_id\": 1,\n  \"qty\": 1\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/holds",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "holds"
+          ]
+        },
+        "description": "Creates a temporary hold. On success the response includes `hold_id` and `expires_at`. Use the returned `hold_id` for creating an order or simulating payment webhooks."
+      }
+    },
+    {
+      "name": "Create Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hold_id\": 1\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/orders",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "orders"
+          ]
+        },
+        "description": "Creates an order from a valid hold. Replace `1` with the `hold_id` returned from the Create Hold request."
+      }
+    },
+    {
+      "name": "Payment Webhook (idempotent)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idempotency_key\": \"webhook-{{randomInt}}\",\n  \"hold_id\": 1,\n  \"status\": \"paid\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/payments/webhook",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "webhook"
+          ]
+        },
+        "description": "Simulates a payment provider webhook. `idempotency_key` can be reused to test idempotent behavior. `status` can be `paid` or `failed`. Replace `hold_id` with your hold id."
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "randomInt",
+      "value": "{{uniqueInt}}",
+      "type": "string"
+    }
+  ]
+}
